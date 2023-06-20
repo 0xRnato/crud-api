@@ -7,6 +7,7 @@ export interface IDatabase {
   findById(id: number): User | undefined;
   findByName(name: string): User[] | undefined;
   findAll(): User[];
+  getAccessCount(id: number): number;
   create(createUserDto: CreateUserDto): User;
   delete(id: number): boolean;
   update(id: number, updateUserDto: UpdateUserDto): User | undefined;
@@ -52,6 +53,17 @@ export const database: IDatabase = {
       });
     }
     return users;
+  },
+
+  /**
+   * Returns the access count for a user with the given id if found, otherwise undefined.
+   *
+   * @param {number} id - The id of the user to retrieve the access count for.
+   * @return {number | undefined} The access count for the user with the given id, or undefined if no user is found.
+   */
+  getAccessCount(id: number) {
+    const user = this.data.find((user) => user.id === id);
+    return user ? user.access : undefined;
   },
 
   /**
