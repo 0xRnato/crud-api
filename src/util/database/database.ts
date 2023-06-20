@@ -4,11 +4,12 @@ import { User } from 'src/users/entities/user.entity';
 
 export interface IDatabase {
   data: User[];
-  findOne(name: string): User | undefined;
+  findById(id: number): User | undefined;
+  findByName(name: string): User[] | undefined;
   findAll(): User[];
   create(createUserDto: CreateUserDto): User;
-  delete(name: string): boolean;
-  update(name: string, updateUserDto: UpdateUserDto): User | undefined;
+  delete(id: number): boolean;
+  update(id: number, updateUserDto: UpdateUserDto): User | undefined;
 }
 
 export const database: IDatabase = {
@@ -22,17 +23,35 @@ export const database: IDatabase = {
   ],
 
   /**
-   * Returns a User object if the user with a matching name is found in the data array.
+   * Finds a user in the data array by their ID and increments their count property if found.
    *
-   * @param {string} name - the name to search for in the data array
-   * @return {User | undefined} - a User object if a match is found, undefined otherwise
+   * @param {number} id - The ID of the user to find.
+   * @return {User | undefined} The user object if found, otherwise undefined.
    */
-  findOne(name: string): User | undefined {
-    const user = this.data.find((user) => user.name === name);
+  findById(id: number): User | undefined {
+    const user = this.data.find((user) => user.id === id);
     if (user) {
       user.count++;
     }
     return user;
+  },
+
+  /**
+   * Searches for users with a given name and increments their count.
+   *
+   * @param {string} name - The name to search for.
+   * @return {User[]|undefined} - An array of users matching the name or undefined if none are found.
+   */
+  findByName(name: string): User[] | undefined {
+    const users = this.data.filter((user) =>
+      user.name.toLowerCase().includes(name.toLowerCase()),
+    );
+    if (users.length > 0) {
+      users.forEach((user) => {
+        user.count++;
+      });
+    }
+    return users;
   },
 
   /**
@@ -58,13 +77,13 @@ export const database: IDatabase = {
   },
 
   /**
-   * Deletes a user from the data array by matching the name.
+   * Deletes an element from the array if it exists, given the id of the element.
    *
-   * @param {string} name - The name of the user to delete.
-   * @return {boolean} Returns true if the user was deleted successfully, false otherwise.
+   * @param {number} id - The id of the element to delete.
+   * @return {boolean} Returns true if the element was deleted. Else, returns false.
    */
-  delete(name: string): boolean {
-    const index = this.data.findIndex((user) => user.name === name);
+  delete(id: number): boolean {
+    const index = this.data.findIndex((user) => user.id === id);
     if (index !== -1) {
       this.data.splice(index, 1);
       return true;
@@ -73,14 +92,14 @@ export const database: IDatabase = {
   },
 
   /**
-   * Updates a user's information and returns the updated user object.
+   * Updates a user with the given id using the information in the provided UpdateUserDto.
    *
-   * @param {string} name - The name of the user to update.
-   * @param {UpdateUserDto} updateUserDto - An object containing the updated information for the user.
-   * @return {User | undefined} The updated user object, or undefined if the user was not found.
+   * @param {number} id - The id of the user to update.
+   * @param {UpdateUserDto} updateUserDto - The data to update for the user.
+   * @return {User | undefined} The updated user if the id is found, otherwise undefined.
    */
-  update(name: string, updateUserDto: UpdateUserDto): User | undefined {
-    const index = this.data.findIndex((user) => user.name === name);
+  update(id: number, updateUserDto: UpdateUserDto): User | undefined {
+    const index = this.data.findIndex((user) => user.id === id);
     if (index !== -1) {
       this.data[index] = { ...this.data[index], ...updateUserDto };
       return this.data[index];

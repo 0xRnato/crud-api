@@ -15,9 +15,9 @@ describe('database', () => {
     db = null;
   });
 
-  describe('findOne', () => {
-    it('should return the user if found', () => {
-      const user = db.findOne('John Doe');
+  describe('findById', () => {
+    it('should return the user if found and increment the count', () => {
+      const user = db.findById(1);
       expect(user).toEqual({
         id: 1,
         name: 'John Doe',
@@ -26,19 +26,32 @@ describe('database', () => {
       });
     });
 
-    it('should increment the count when user is found', () => {
-      const user = db.findOne('John Doe');
-      expect(user.count).toBe(1);
-    });
-
     it('should return undefined if user is not found', () => {
-      const user = db.findOne('Unknown User');
+      const user = db.findById(2);
       expect(user).toBeUndefined();
     });
   });
 
+  describe('findByName', () => {
+    it('should return users with matching names and increment the count', () => {
+      const users = db.findByName('john');
+      expect(users.length).toBe(1);
+      expect(users[0]).toEqual({
+        id: 1,
+        name: 'John Doe',
+        job: 'Developer',
+        count: 1,
+      });
+    });
+
+    it('should return an empty array if no users are found', () => {
+      const users = db.findByName('unknown');
+      expect(users.length).toBe(0);
+    });
+  });
+
   describe('findAll', () => {
-    it('should return all users in the data array', () => {
+    it('should return a copy of all users in the data array', () => {
       const users = db.findAll();
       expect(users.length).toBe(1);
       expect(users[0]).toEqual({
@@ -75,25 +88,25 @@ describe('database', () => {
   });
 
   describe('delete', () => {
-    it('should delete the user with the specified name', () => {
-      const result = db.delete('John Doe');
+    it('should delete the user with the specified id', () => {
+      const result = db.delete(1);
       expect(result).toBe(true);
       expect(db.data.length).toBe(0);
     });
 
     it('should return false if the user to delete is not found', () => {
-      const result = db.delete('Unknown User');
+      const result = db.delete(2);
       expect(result).toBe(false);
       expect(db.data.length).toBe(1);
     });
   });
 
   describe('update', () => {
-    it('should update the user with the specified name', () => {
+    it('should update the user with the specified id', () => {
       const updateUserDto: UpdateUserDto = {
         job: 'Architect',
       };
-      const updatedUser = db.update('John Doe', updateUserDto);
+      const updatedUser = db.update(1, updateUserDto);
       expect(updatedUser).toEqual({
         id: 1,
         name: 'John Doe',
@@ -107,7 +120,7 @@ describe('database', () => {
       const updateUserDto: UpdateUserDto = {
         job: 'Architect',
       };
-      const updatedUser = db.update('Unknown User', updateUserDto);
+      const updatedUser = db.update(2, updateUserDto);
       expect(updatedUser).toBeUndefined();
     });
   });
