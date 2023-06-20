@@ -1,6 +1,6 @@
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { UpdateUserDto } from 'src/users/dto/update-user.dto';
-import { User } from 'src/users/entities/user.entity';
+import { CreateUserDto } from '../../users/dto/create-user.dto';
+import { UpdateUserDto } from '../../users/dto/update-user.dto';
+import { User, UserPermissions } from '../../users/entities/user.entity';
 
 export interface IDatabase {
   data: User[];
@@ -8,6 +8,7 @@ export interface IDatabase {
   findByName(name: string): User[] | undefined;
   findAll(): User[];
   getAccessCount(id: number): number;
+  getPermissions(id: number): UserPermissions[];
   create(createUserDto: CreateUserDto): User;
   delete(id: number): boolean;
   update(id: number, updateUserDto: UpdateUserDto): User | undefined;
@@ -20,6 +21,14 @@ export const database: IDatabase = {
       name: 'John Doe',
       job: 'Developer',
       count: 0,
+      permissions: [UserPermissions.Update, UserPermissions.Delete],
+    },
+    {
+      id: 2,
+      name: 'Jane Doe',
+      job: 'Designer',
+      count: 0,
+      permissions: [],
     },
   ],
 
@@ -64,6 +73,18 @@ export const database: IDatabase = {
   getAccessCount(id: number) {
     const user = this.data.find((user) => user.id === id);
     return user ? user.access : undefined;
+  },
+
+  /**
+   * Returns an array of user permissions for the given user ID.
+   *
+   * @param {number} id - The ID of the user to get permissions for.
+   * @return {UserPermissions[]} An array of user permissions if the user is found,
+   * otherwise an empty array.
+   */
+  getPermissions(id: number): UserPermissions[] {
+    const user = this.data.find((user) => user.id === id);
+    return user ? user.permissions : [];
   },
 
   /**

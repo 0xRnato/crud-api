@@ -1,8 +1,9 @@
 import { cloneDeep } from 'lodash';
 
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { UpdateUserDto } from 'src/users/dto/update-user.dto';
-import { database, IDatabase } from './database';
+import { CreateUserDto } from '../../users/dto/create-user.dto';
+import { UpdateUserDto } from '../../users/dto/update-user.dto';
+import { UserPermissions } from '../../users/entities/user.entity';
+import { IDatabase, database } from './database';
 
 describe('database', () => {
   let db: IDatabase;
@@ -23,11 +24,12 @@ describe('database', () => {
         name: 'John Doe',
         job: 'Developer',
         count: 1,
+        permissions: [UserPermissions.Update, UserPermissions.Delete],
       });
     });
 
     it('should return undefined if user is not found', () => {
-      const user = db.findById(2);
+      const user = db.findById(3);
       expect(user).toBeUndefined();
     });
   });
@@ -41,6 +43,7 @@ describe('database', () => {
         name: 'John Doe',
         job: 'Developer',
         count: 1,
+        permissions: [UserPermissions.Update, UserPermissions.Delete],
       });
     });
 
@@ -53,12 +56,20 @@ describe('database', () => {
   describe('findAll', () => {
     it('should return a copy of all users in the data array', () => {
       const users = db.findAll();
-      expect(users.length).toBe(1);
+      expect(users.length).toBe(2);
       expect(users[0]).toEqual({
         id: 1,
         name: 'John Doe',
         job: 'Developer',
         count: 0,
+        permissions: [UserPermissions.Update, UserPermissions.Delete],
+      });
+      expect(users[1]).toEqual({
+        id: 2,
+        name: 'Jane Doe',
+        job: 'Designer',
+        count: 0,
+        permissions: [],
       });
     });
 
@@ -74,16 +85,18 @@ describe('database', () => {
       const createUserDto: CreateUserDto = {
         name: 'Jane Smith',
         job: 'Designer',
+        permissions: [],
       };
       const newUser = db.create(createUserDto);
       expect(newUser).toEqual({
-        id: 2,
+        id: 3,
         name: 'Jane Smith',
         job: 'Designer',
         count: 0,
+        permissions: [],
       });
-      expect(db.data.length).toBe(2);
-      expect(db.data[1]).toBe(newUser);
+      expect(db.data.length).toBe(3);
+      expect(db.data[2]).toBe(newUser);
     });
   });
 
@@ -91,13 +104,13 @@ describe('database', () => {
     it('should delete the user with the specified id', () => {
       const result = db.delete(1);
       expect(result).toBe(true);
-      expect(db.data.length).toBe(0);
+      expect(db.data.length).toBe(1);
     });
 
     it('should return false if the user to delete is not found', () => {
-      const result = db.delete(2);
+      const result = db.delete(3);
       expect(result).toBe(false);
-      expect(db.data.length).toBe(1);
+      expect(db.data.length).toBe(2);
     });
   });
 
@@ -105,6 +118,7 @@ describe('database', () => {
     it('should update the user with the specified id', () => {
       const updateUserDto: UpdateUserDto = {
         job: 'Architect',
+        permissions: [],
       };
       const updatedUser = db.update(1, updateUserDto);
       expect(updatedUser).toEqual({
@@ -112,6 +126,7 @@ describe('database', () => {
         name: 'John Doe',
         job: 'Architect',
         count: 0,
+        permissions: [],
       });
       expect(db.data[0]).toBe(updatedUser);
     });
@@ -119,8 +134,9 @@ describe('database', () => {
     it('should return undefined if the user to update is not found', () => {
       const updateUserDto: UpdateUserDto = {
         job: 'Architect',
+        permissions: [],
       };
-      const updatedUser = db.update(2, updateUserDto);
+      const updatedUser = db.update(3, updateUserDto);
       expect(updatedUser).toBeUndefined();
     });
   });

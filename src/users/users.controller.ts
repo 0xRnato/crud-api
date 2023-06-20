@@ -9,6 +9,8 @@ import {
   ParseIntPipe,
   BadRequestException,
   Query,
+  UseGuards,
+  SetMetadata,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,7 +21,8 @@ import {
   SuccessResponse,
   ErrorResponse,
 } from '../util/http/response.interface';
-import { User } from './entities/user.entity';
+import { User, UserPermissions } from './entities/user.entity';
+import { PermissionsGuard } from '../util/guards/permissions.guard';
 
 @Controller('users')
 export class UsersController {
@@ -72,6 +75,8 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseGuards(PermissionsGuard)
+  @SetMetadata('permissions', [UserPermissions.Update])
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
@@ -85,6 +90,8 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(PermissionsGuard)
+  @SetMetadata('permissions', [UserPermissions.Delete])
   async remove(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<IResponse<void>> {

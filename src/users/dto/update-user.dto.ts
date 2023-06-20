@@ -1,4 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
+import { UserPermissions } from '../entities/user.entity';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -8,4 +9,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   job?: string;
+
+  @IsOptional()
+  @IsArray()
+  permissions: UserPermissions[];
 }

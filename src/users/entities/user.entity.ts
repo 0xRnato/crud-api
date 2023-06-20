@@ -3,4 +3,10 @@ export class User {
   name: string;
   job: string;
   count: number;
+  permissions: UserPermissions[];
+}
+
+export enum UserPermissions {
+  Delete = 'delete',
+  Update = 'update',
 }
